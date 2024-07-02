@@ -2,29 +2,27 @@ version: '3.4'
 services:
   # ThingsBoard IoT Gateway Service Configuration
   tb-gateway:
-    image: thingsboard/tb-gateway
+    image: phamchanhuy113/thingsboard-gateway
     container_name: tb-gateway
     restart: always
 
-    # Ports bindings - required by some connectors
+    # Ports tìm thấy
     ports:
-        - "5000:5000" # Comment if you don't use REST connector and change if you use another port
-        # Uncomment and modify the following ports based on connector usage:
-#        - "1052:1052" # BACnet connector
-#        - "5026:5026" # Modbus TCP connector (Modbus Slave)
-#        - "50000:50000/tcp" # Socket connector with type TCP
-#        - "50000:50000/udp" # Socket connector with type UDP
+        - "5000:5000"
+        - "1052:1052" # BACnet connector
+        - "5026:5026" # Modbus TCP connector
+        - "50000:50000/tcp" # Socket connector with type TCP
+        - "50000:50000/udp" # Socket connector with type UDP
 
-    # Necessary mapping for Linux
+    # Ánh xạ container ra host
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-    # Environment variables
+    # Biến môi trường
     environment:
-      - TB_GW_HOST=host.docker.internal
-      - TB_GW_PORT=1883
-      - TB_GW_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
-      - TB_GW_LOGS_PATH=/thingsboard_gateway/logs
+      - host=cloud.things.vn
+      - port=1883
+      - accessToken=DEVICE_ACCESS_TOKEN
 
     # Volumes bind
     volumes:
