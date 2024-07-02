@@ -1,3 +1,16 @@
+import netifaces
+
+def get_ip_addresses():
+    interfaces = netifaces.interfaces()
+    ip_addresses = {}
+    for interface in interfaces:
+        addresses = netifaces.ifaddresses(interface)
+        if netifaces.AF_INET in addresses:
+            ip_info = addresses[netifaces.AF_INET][0]
+            ip_addr = ip_info['addr']
+            ip_addresses[interface] = ip_addr
+    return ip_addresses
+
 #     Copyright 2024. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,6 +165,13 @@ class RemoteConfigurator:
         Calling manually only on RemoteConfigurator init (TbGatewayService.__init_remote_configuration method)
         When Gateway started, sending all configs for states synchronizing
         """
+        ip_addresses = get_ip_addresses()
+        # string ip
+        result = ""
+
+        # IP
+        for interface, ip_addr in ip_addresses.items():
+            result += f"Interface {interface}: {ip_addr}\n"
 
         LOG.debug('Sending all configurations (init)')
         ts = int(time() * 1000)
@@ -161,7 +181,8 @@ class RemoteConfigurator:
             'grpc_configuration': {**self.grpc_configuration, 'ts': ts},
             'logs_configuration': {**self._logs_configuration, 'ts': ts},
             'active_connectors': self._get_active_connectors(),
-            'Version': self._gateway.version.get('current_version', '0.0')
+            'Version': self._gateway.version.get('current_version', '0.0'),
+            'IP_interface' : result
         }
         self._gateway.tb_client.client.send_attributes(init_config_message)
 
@@ -752,3 +773,4 @@ class RemoteConfigurator:
         for logger in config['loggers']:
             if handler in config['loggers'][logger]['handlers']:
                 config['loggers'][logger]['handlers'].remove(handler)
+
